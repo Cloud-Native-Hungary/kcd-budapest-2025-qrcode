@@ -10,6 +10,8 @@ pipeline:
         meta email = this."Email"
         meta attendee_id = this."Attendee ID"
 
+    - mapping: from "mappings/misc.blobl"
+
 output:
   broker:
     pattern: fan_out
@@ -23,6 +25,7 @@ output:
                 path: output/output.csv
                 codec: lines
         processors:
+          - mapping: from "mappings/misc.blobl"
           - mapping: |
               root.email = this."Email"
               root.name = this."First Name" + " " + this."Last Name"
@@ -57,10 +60,10 @@ output:
               root = $header + $kvs.map_each(kv -> kv.value.string().apply("escape_csv")).join(",")
 
       - file:
-          path: output/qrcode/${! meta("attendee_id") }.png
+          path: output/qrcode/${! meta("attendee_id") }.svg
           codec: all-bytes
         processors:
           - mapping: |
               root = this."Attendee ID"
           - qrcode:
-              format: png
+              format: svg
